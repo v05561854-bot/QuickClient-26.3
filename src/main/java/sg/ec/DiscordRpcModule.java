@@ -35,7 +35,8 @@ public class DiscordRpcModule extends ClientModule {
    private static final String field12722 = "rpc";
 
    private static String method05933(String var0) {
-      return "https://api.mcstatus.io/v2/icon/" + var0;
+      // Remote icon lookup removed together with the presence publishing itself.
+      return "";
    }
 
    private static boolean method05934() {
@@ -118,27 +119,12 @@ public class DiscordRpcModule extends ClientModule {
 
    @Subscribe
    private void method05940(TickEvent var1) {
-      if (this.field12700.method03022()) {
-         if (this.field12705) {
-            DiscordRPC.stop();
-            this.field12705 = false;
-            this.field12706 = null;
-         }
-      } else {
-         if (!this.field12705) {
-            DiscordRPC.start();
-            this.field12705 = true;
-            this.field12706 = null;
-            this.field12707 = Instant.now();
-         }
-
-         String var2 = this.field12701.method03022() ? this.method05941() : "";
-         String var3 = this.method05942();
-         String var4 = var2 + "|" + var3;
-         if (!var4.equals(this.field12706)) {
-            this.field12706 = var4;
-            DiscordRPC.update(this.method05938(var2, var3));
-         }
+      // Discord presence publishing is disabled: the client publishes nothing to any third-party
+      // service. Any session left over from an earlier start is torn down here.
+      if (this.field12705) {
+         DiscordRPC.stop();
+         this.field12705 = false;
+         this.field12706 = null;
       }
    }
 
