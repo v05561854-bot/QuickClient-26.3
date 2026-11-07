@@ -1,0 +1,27 @@
+# Gradle
+.gradle/
+build/
+out/
+classes/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# Fabric / run dirs
+run/
+remappedSrc/
+logs/
+*.log
+
+# Agent / tooling state
+.freebuff/
+.opencode/
+
+# OS
+.DS_Store
+Thumbs.db

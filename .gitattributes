@@ -1,0 +1,10 @@
+* text=auto
+
+# Gradle wrapper must keep its platform line endings
+gradlew text eol=lf
+gradlew.bat text eol=crlf
+
+# Binary resources
+*.jar binary
+*.bin binary
+src/main/resources/assets/hex/* binary
