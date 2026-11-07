@@ -60,6 +60,17 @@ public class ElytraTarget extends ClientModule {
    public final NumberSetting<Integer> field11612;
    private final ElapsedTimer field11613;
    private Vec3 field11614;
+   private final ToggleSetting field11633;
+   private final NumberSetting<Float> field11634;
+   private final NumberSetting<Float> field11635;
+   private final NumberSetting<Float> field11636;
+   private final NumberSetting<Float> field11637;
+   private final NumberSetting<Float> field11638;
+   private final NumberSetting<Float> field11639;
+   private final ToggleSetting field11643;
+   private final NumberSetting<Float> field11644;
+   private final NumberSetting<Float> field11645;
+   private int field11646 = Integer.MIN_VALUE;
    private static final String field11524 = "Дистанция обнаружения";
    private static final float field11525 = 5.0F;
    private static final float field11526 = 100.0F;
@@ -157,6 +168,16 @@ public class ElytraTarget extends ClientModule {
    private static final int field11623 = 50;
    private static final int field11624 = 400;
    private static final double field11625 = 20.0;
+   private static final String field11626 = "Предикт перегона";
+   private static final String field11627 = "Макс. упреждение (тики)";
+   private static final String field11628 = "Вес дистанции";
+   private static final String field11629 = "Вес поворота";
+   private static final String field11630 = "Вес клиренса";
+   private static final String field11631 = "Штраф за высоту";
+   private static final String field11632 = "Дистанция отхода";
+   private static final String field11640 = "Синхронизация с аурой";
+   private static final String field11641 = "Упреждение атаки (тики)";
+   private static final String field11642 = "Запас дистанции";
 
    private void method05281() {
       if (this.field11519.method04698(field11605)) {
@@ -254,6 +275,7 @@ public class ElytraTarget extends ClientModule {
    private void method05288(PlayerUpdateEvent var1) {
       if (mc.player != null && mc.level != null) {
          LivingEntity var2 = AttackAura.method00456();
+         this.method05319(var2);
          if (this.field11504.method05999()
             && mc.player.isFallFlying()
             && var2 != null
@@ -267,13 +289,15 @@ public class ElytraTarget extends ClientModule {
                this.method05295();
                this.field11522.method04694();
                this.field11514 = ElytraTarget.Nested159.LEAVING;
-               this.method05302(var3, var4, var2);
+               this.field11515 = this.method05315(var3, this.method05311(var2, var4), var2);
+               this.field11517 = false;
+               this.field11520.method04694();
                this.method05281();
                this.field11516 = true;
             } else {
                this.field11516 = false;
                if (this.field11514 == ElytraTarget.Nested159.ATTACK) {
-                  this.method05304(var3, var4, var5);
+                  this.method05304(var3, var4, var5, var2);
                } else {
                   this.method05309(var3, var4, var2, var5);
                }
@@ -346,6 +370,59 @@ public class ElytraTarget extends ClientModule {
          .method10838(field11622)
          .method10834(field11623)
          .method03017(field11624)
+         .method03023(this);
+      this.field11633 = new ToggleSetting(field11626).method03014(true).method03023(this);
+      this.field11634 = new NumberSetting<Float>(field11627)
+         .method10835(0.0F)
+         .method10838(20.0F)
+         .method10834(0.5F)
+         .method03017(8.0F)
+         .method03025(this.field11633::method05999)
+         .method03023(this);
+      this.field11635 = new NumberSetting<Float>(field11628)
+         .method10835(0.0F)
+         .method10838(2.0F)
+         .method10834(0.05F)
+         .method03017(0.2F)
+         .method03023(this);
+      this.field11636 = new NumberSetting<Float>(field11629)
+         .method10835(0.0F)
+         .method10838(3.0F)
+         .method10834(0.05F)
+         .method03017(1.0F)
+         .method03023(this);
+      this.field11637 = new NumberSetting<Float>(field11630)
+         .method10835(0.0F)
+         .method10838(10.0F)
+         .method10834(0.5F)
+         .method03017(2.0F)
+         .method03023(this);
+      this.field11638 = new NumberSetting<Float>(field11631)
+         .method10835(0.0F)
+         .method10838(20.0F)
+         .method10834(0.5F)
+         .method03017(6.0F)
+         .method03023(this);
+      this.field11639 = new NumberSetting<Float>(field11632)
+         .method10835(3.0F)
+         .method10838(15.0F)
+         .method10834(0.5F)
+         .method03017(7.0F)
+         .method03023(this);
+      this.field11643 = new ToggleSetting(field11640).method03014(true).method03023(this);
+      this.field11644 = new NumberSetting<Float>(field11641)
+         .method10835(0.0F)
+         .method10838(10.0F)
+         .method10834(1.0F)
+         .method03017(3.0F)
+         .method03025(this.field11643::method05999)
+         .method03023(this);
+      this.field11645 = new NumberSetting<Float>(field11642)
+         .method10835(0.0F)
+         .method10838(3.0F)
+         .method10834(0.1F)
+         .method03017(0.8F)
+         .method03025(this.field11643::method05999)
          .method03023(this);
       this.field11514 = ElytraTarget.Nested159.LEAVING;
       this.field11515 = null;
@@ -510,7 +587,13 @@ public class ElytraTarget extends ClientModule {
    @Subscribe
    private void method05301(AttackEntityEvent var1) {
       if (var1.method09431() != AttackEntityEvent.Nested264.POST) {
-         this.field11518 = -this.field11518;
+         LivingEntity var2 = AttackAura.method00456();
+         if (mc.player != null && var2 != null) {
+            this.method05314(mc.player.getEyePosition(), var2.getEyePosition(), var2);
+         } else {
+            this.field11518 = -this.field11518;
+         }
+
          this.field11514 = ElytraTarget.Nested159.LEAVING;
          this.field11517 = true;
       }
@@ -518,9 +601,10 @@ public class ElytraTarget extends ClientModule {
 
    private void method05302(Vec3 var1, Vec3 var2, LivingEntity var3) {
       if (!this.field11516 || this.field11515 == null || this.field11520.method04699(field11562)) {
-         Vec3 var4 = this.method05305(var1, var2, var3, field11563);
-         if (var4 != null) {
-            this.field11515 = var4;
+         double var4 = Math.max(this.field11639.method03022().doubleValue(), this.field11505.method03022().doubleValue());
+         Vec3 var6 = this.method05305(var1, this.method05311(var3, var2), var3, var4);
+         if (var6 != null) {
+            this.field11515 = var6;
          }
 
          this.field11520.method04694();
@@ -530,59 +614,95 @@ public class ElytraTarget extends ClientModule {
    private Vec3 method05303(Vec3 var1, Vec3 var2, LivingEntity var3) {
       Vec3 var4 = this.method05299(var3, var1, var2);
       Vec3 var5 = this.method05282(var4);
-      double var6 = Math.max(field11564, this.field11505.method03022().floatValue());
+      Vec3 var6 = this.method05311(var3, var2);
+      double var7 = Math.max(this.field11639.method03022().doubleValue(), this.field11505.method03022().doubleValue());
       this.field11523.clear();
-      this.method05287(var4, var5, var6);
-      this.method05287(var4, var5, var6 + field11565);
-      this.method05287(var4, var5, var6 + field11566);
-      float var8 = mc.player.getYRot();
-      float var9 = mc.player.getXRot();
-      Vec3 var10 = null;
+      this.method05287(var4, var5, var7);
+      this.method05287(var4, var5, var7 + field11565);
+      this.method05287(var4, var5, var7 + field11566);
+      float var9 = mc.player.getYRot();
+      float var10 = mc.player.getXRot();
       Vec3 var11 = null;
-      double var12 = Double.NEGATIVE_INFINITY;
-      double var14 = Double.NEGATIVE_INFINITY;
+      Vec3 var12 = null;
+      double var13 = Double.NEGATIVE_INFINITY;
+      double var15 = Double.NEGATIVE_INFINITY;
 
-      for (Vec3 var17 : this.field11523) {
-         double var18 = Math.hypot(var17.x, var17.z);
-         if (!(var18 < field11567)) {
-            Vec3 var20 = var2.add(var17);
-            if (!(var20.distanceTo(var1) < field11568) && this.method05285(var20) && GuiHitTestUtils.method05608(var20) && this.method05291(var1, var20)) {
-               double var21 = Math.max(0.0, var17.y) / Math.max(field11569, var18);
-               double var23 = Math.max(0.0, var21 - field11570) * field11571;
-               double var25 = Math.max(0.0, (var17.x * var4.x + var17.z * var4.z) / var18);
-               double var27 = this.method05293(var1, var20, var8, var9);
-               double var29 = -var27 + var25 * field11572 + var18 * field11573 - var23;
-               double var31 = var17.x * var5.x + var17.z * var5.z;
-               if (var31 * this.field11518 > 0.0) {
-                  if (var29 > var12) {
-                     var12 = var29;
-                     var10 = var17;
+      for (Vec3 var18 : this.field11523) {
+         double var19 = Math.hypot(var18.x, var18.z);
+         if (!(var19 < field11567)) {
+            Vec3 var21 = var6.add(var18);
+            if (!(var21.distanceTo(var1) < field11568) && this.method05285(var21) && GuiHitTestUtils.method05608(var21) && this.method05291(var1, var21)) {
+               double var22 = var18.y / Math.max(field11569, var19);
+               double var24 = Math.max(0.0, Math.abs(var22) - field11570) * this.field11638.method03022().doubleValue();
+               double var26 = Math.max(0.0, (var18.x * var4.x + var18.z * var4.z) / var19);
+               double var28 = this.method05293(var1, var21, var9, var10);
+               double var30 = this.method05312(var21);
+               double var32 = -var28 * this.field11636.method03022().doubleValue()
+                  + var26 * field11572
+                  - var18.length() * this.field11635.method03022().doubleValue()
+                  + var30 * this.field11637.method03022().doubleValue()
+                  - var24;
+               double var34 = var18.x * var5.x + var18.z * var5.z;
+               if (var34 * this.field11518 > 0.0) {
+                  if (var32 > var13) {
+                     var13 = var32;
+                     var11 = var18;
                   }
-               } else if (var29 > var14) {
-                  var14 = var29;
-                  var11 = var17;
+               } else if (var32 > var15) {
+                  var15 = var32;
+                  var12 = var18;
                }
             }
          }
       }
 
-      Vec3 var33 = var10 != null ? var10 : var11;
-      return var33 == null ? this.method05305(var1, var2, var3, var6 + field11574) : var2.add(var33);
+      Vec3 var36 = var11 != null ? var11 : var12;
+      return var36 == null ? this.method05305(var1, var6, var3, var7 + field11574) : var6.add(var36);
    }
 
-   private void method05304(Vec3 var1, Vec3 var2, double var3) {
-      boolean var5 = GuiHitTestUtils.method05608(var2) && this.method05291(var1, var2);
-      if (var5) {
-         this.field11515 = var2;
+   private void method05304(Vec3 var1, Vec3 var2, double var3, LivingEntity var4) {
+      AttackAura var5 = ModuleManager.INSTANCE.method08219();
+      Vec3 var6 = this.method05311(var4, var2);
+      if (this.method05316(var5)) {
+         int var7 = var5.method00465();
+         double var8 = Math.hypot(mc.player.getDeltaMovement().x, mc.player.getDeltaMovement().z);
+         double var10 = this.method05318()
+            + Math.max(0.0, this.field11644.method03022().doubleValue()) * Math.max(var8, 0.1);
+         if (!var5.method00437() || var7 > this.field11644.method03022().intValue() || var3 > var10) {
+            this.field11514 = ElytraTarget.Nested159.LEAVING;
+            return;
+         }
+
+         Vec3 var12 = var5.field00787 && var5.field00788 != null && var5.field00788.lengthSqr() > field11582 ? var5.field00788 : var6;
+         Vec3 var13 = this.method05320(var1, var12, this.method05318());
+         if (this.method05285(var13) && GuiHitTestUtils.method05608(var13) && this.method05291(var1, var13)) {
+            this.field11515 = var13;
+         } else {
+            Vec3 var14 = var13.subtract(var1);
+            double var15 = Math.min(var14.length(), this.field11505.method03022().doubleValue() + field11559);
+            Vec3 var17 = this.method05286(var1, var14, var15);
+            if (var17 != null && var17.distanceTo(var1) >= field11560) {
+               this.field11515 = var17;
+            } else {
+               this.field11514 = ElytraTarget.Nested159.LEAVING;
+            }
+         }
+
+         return;
+      }
+
+      boolean var18 = GuiHitTestUtils.method05608(var6) && this.method05291(var1, var6);
+      if (var18) {
+         this.field11515 = var6;
          if (var3 <= this.field11505.method03022().floatValue() * field11558) {
             this.field11514 = ElytraTarget.Nested159.LEAVING;
          }
       } else {
-         Vec3 var6 = var2.subtract(var1);
-         double var7 = Math.min(var6.length(), this.field11505.method03022().floatValue() + field11559);
-         Vec3 var9 = this.method05286(var1, var6, var7);
-         if (var9 != null && var9.distanceTo(var1) >= field11560) {
-            this.field11515 = var9;
+         Vec3 var19 = var6.subtract(var1);
+         double var20 = Math.min(var19.length(), this.field11505.method03022().floatValue() + field11559);
+         Vec3 var22 = this.method05286(var1, var19, var20);
+         if (var22 != null && var22.distanceTo(var1) >= field11560) {
+            this.field11515 = var22;
          } else {
             this.field11514 = ElytraTarget.Nested159.LEAVING;
          }
@@ -626,6 +746,199 @@ public class ElytraTarget extends ClientModule {
       return var1.add(var19.normalize().scale(field11591));
    }
 
+   private Vec3 method05311(LivingEntity var1, Vec3 var2) {
+      AttackAura var3 = ModuleManager.INSTANCE.method08219();
+      if (var3 != null
+         && var3.method03937()
+         && AttackAura.method00456() == var1
+         && var3.field00788 != null
+         && var3.field00788.lengthSqr() > field11582) {
+         return var3.field00788;
+      }
+
+      if (!this.field11633.method05999()) {
+         return var2;
+      }
+
+      Vec3 var4 = var1.getDeltaMovement();
+      if (var4.lengthSqr() < field11582) {
+         var4 = new Vec3(var1.getX() - var1.xo, var1.getY() - var1.yo, var1.getZ() - var1.zo);
+      }
+
+      if (var4.lengthSqr() < field11582) {
+         return var2;
+      }
+
+      Vec3 var5 = var4;
+      double var6 = 1.0;
+      if (this.field11506.method05999()) {
+         var6 = Mth.clamp(this.field11509.method03022().doubleValue() / 3.0, 0.0, 1.5);
+         double var8 = Math.hypot(var4.x, var4.z) * field11625;
+         var6 *= Mth.clamp(var8 / Math.max(this.field11508.method03022().doubleValue(), 1.0), 0.0, 1.5);
+         if (this.field11507.method05600(field11537)) {
+            Vec3 var10 = var1.getLookAngle();
+            if (var10.lengthSqr() > field11582) {
+               var5 = var10.normalize().scale(Math.max(var4.length(), 0.15));
+            }
+         }
+      }
+
+      double var12 = mc.player.getEyePosition().distanceTo(var2);
+      double var14 = mc.player.getDeltaMovement().length();
+      double var16 = Mth.clamp(var12 / Math.max(var14, 0.1), 0.0, this.field11634.method03022().doubleValue());
+      var16 *= var6;
+      return var16 <= field11575 ? var2 : var2.add(var5.scale(var16));
+   }
+
+   private double method05312(Vec3 var1) {
+      if (mc.player == null || mc.level == null) {
+         return 0.0;
+      }
+
+      AABB var2 = mc.player
+         .getBoundingBox()
+         .move(var1.x - mc.player.getX(), var1.y - mc.player.getEyeY(), var1.z - mc.player.getZ())
+         .inflate(field11587);
+      if (!mc.level.noCollision(mc.player, var2)) {
+         return 0.0;
+      }
+
+      double var3 = 1.0;
+      if (mc.level.containsAnyLiquid(var2)) {
+         var3 -= 0.5;
+      }
+
+      if (this.method05297(var2)) {
+         var3 -= 0.75;
+      }
+
+      return Math.max(0.0, var3);
+   }
+
+   private double method05313() {
+      AttackAura var1 = ModuleManager.INSTANCE.method08219();
+      double var2 = var1 == null
+         ? this.field11505.method03022().doubleValue() + field11559
+         : var1.method00403() + var1.method00414();
+      if (mc.player != null && mc.player.isFallFlying() && this.method03937()) {
+         var2 += this.field11503.method03022().doubleValue();
+      }
+
+      return Math.max(2.0, var2);
+   }
+
+   private double method05318() {
+      return Math.max(2.0, this.method05313() - this.field11645.method03022().doubleValue());
+   }
+
+   private boolean method05316(AttackAura var1) {
+      return this.field11643.method05999() && var1 != null && var1.method03937();
+   }
+
+   private boolean method05319(LivingEntity var1) {
+      int var2 = var1 == null ? Integer.MIN_VALUE : var1.getId();
+      if (var2 == this.field11646) {
+         return false;
+      }
+
+      this.field11646 = var2;
+      this.method05284();
+      this.field11518 = 1;
+      this.field11519.method04694();
+      this.field11520.method04694();
+      this.field11521.method04694();
+      this.field11522.method04694();
+      this.field11613.method04694();
+      return true;
+   }
+
+   public void method05322(LivingEntity var1) {
+      this.method05319(var1);
+   }
+
+   private Vec3 method05320(Vec3 var1, Vec3 var2, double var3) {
+      Vec3 var5 = var1.subtract(var2);
+      double var6 = var5.length();
+      if (var6 < field11600) {
+         return var2;
+      }
+
+      return var2.add(var5.scale(Math.min(var6, Math.max(0.0, var3)) / var6));
+   }
+
+   private void method05314(Vec3 var1, Vec3 var2, LivingEntity var3) {
+      Vec3 var4 = this.method05299(var3, var1, var2);
+      Vec3 var5 = this.method05282(var4);
+      Vec3 var6 = this.method05311(var3, var2);
+      double var7 = Math.max(this.field11639.method03022().doubleValue(), this.field11505.method03022().doubleValue());
+      double[] var9 = new double[2];
+
+      for (int var10 = 0; var10 < 2; var10++) {
+         double var11 = var10 == 0 ? 1.0 : -1.0;
+         Vec3 var13 = var5.scale(var11);
+
+         for (int var14 = 0; var14 < 3; var14++) {
+            double var15 = var7 + var14 * field11565;
+            Vec3 var17 = var6.add(var13.scale(var15));
+            if (this.method05294(var1, var2, var17)) {
+               var9[var10] = var9[var10] + this.method05312(var17) * 2.0 + 1.0 - this.method05293(var1, var17, mc.player.getYRot(), mc.player.getXRot()) * 0.01;
+            } else {
+               var9[var10] -= 2.0;
+            }
+         }
+      }
+
+      if (Math.abs(var9[0] - var9[1]) > field11575) {
+         this.field11518 = var9[0] >= var9[1] ? 1 : -1;
+      } else {
+         this.field11518 = -this.field11518;
+      }
+   }
+
+   private Vec3 method05315(Vec3 var1, Vec3 var2, LivingEntity var3) {
+      Vec3 var4 = mc.player.getDeltaMovement();
+      Vec3 var5 = new Vec3(var4.x, 0.0, var4.z);
+      if (var5.lengthSqr() < field11582) {
+         var5 = new Vec3(var1.x - var2.x, 0.0, var1.z - var2.z);
+      }
+
+      if (var5.lengthSqr() < field11582) {
+         var5 = new Vec3(1.0, 0.0, 0.0);
+      }
+
+      var5 = var5.normalize();
+      Vec3 var6 = this.method05282(var5);
+      double var7 = Math.max(this.field11639.method03022().doubleValue(), this.field11505.method03022().doubleValue());
+      Vec3[] var9 = new Vec3[]{
+         var5.add(0.0, 0.8, 0.0).normalize(),
+         var6,
+         var6.reverse(),
+         var5.add(var6).normalize(),
+         var5.add(var6.reverse()).normalize(),
+         new Vec3(0.0, 1.0, 0.0),
+         var5.add(0.0, -0.4, 0.0).normalize()
+      };
+      Vec3 var10 = null;
+      double var11 = Double.NEGATIVE_INFINITY;
+
+      for (Vec3 var13 : var9) {
+         Vec3 var14 = this.method05286(var1, var13, var7);
+         if (var14 != null && !(var14.distanceTo(var1) < field11561)) {
+            double var15 = this.method05312(var14);
+            if (!(var15 <= 0.0)) {
+               double var17 = this.method05293(var1, var14, mc.player.getYRot(), mc.player.getXRot());
+               double var19 = var15 * 4.0 - var17 * 0.05 + var14.distanceTo(var2) * 0.02;
+               if (var19 > var11) {
+                  var11 = var19;
+                  var10 = var14;
+               }
+            }
+         }
+      }
+
+      return var10 != null ? var10 : this.method05305(var1, var2, var3, var7);
+   }
+
    private static int method05306(double var0, double var2) {
       return Math.max(2, (int)Math.ceil(var0 / var2));
    }
@@ -648,17 +961,28 @@ public class ElytraTarget extends ClientModule {
    }
 
    private void method05309(Vec3 var1, Vec3 var2, LivingEntity var3, double var4) {
-      boolean var6 = this.field11517
+      AttackAura var6 = ModuleManager.INSTANCE.method08219();
+      boolean var7 = this.field11517
          || this.field11515 == null
          || var1.distanceTo(this.field11515) < field11561
          || !this.method05294(var1, var2, this.field11515);
-      if (var6) {
+      if (var7) {
          this.field11515 = this.method05303(var1, var2, var3);
          this.field11517 = false;
          this.method05310(true);
       }
 
-      if (var4 > this.field11505.method03022().floatValue()) {
+      if (this.method05316(var6)) {
+         double var8 = Math.hypot(mc.player.getDeltaMovement().x, mc.player.getDeltaMovement().z);
+         double var10 = this.method05318()
+            + Math.max(0.0, this.field11644.method03022().doubleValue()) * Math.max(var8, 0.1);
+         if (var6.method00437()
+            && var6.method00465() <= this.field11644.method03022().intValue()
+            && var4 <= var10) {
+            this.field11514 = ElytraTarget.Nested159.ATTACK;
+            this.method05281();
+         }
+      } else if (var4 > this.field11505.method03022().floatValue()) {
          this.field11514 = ElytraTarget.Nested159.ATTACK;
          this.method05281();
       }

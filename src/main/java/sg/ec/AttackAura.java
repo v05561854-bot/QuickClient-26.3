@@ -356,6 +356,8 @@ public class AttackAura extends ClientModule {
 
          field00785 = this.field00812.getFirst().entity();
       }
+
+      var1.method05322(field00785);
    }
 
    private void method00374(ElytraTarget var1, boolean var2) {
