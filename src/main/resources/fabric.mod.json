@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "quickclient",
+  "version": "1.0.0",
+  "name": "QuickClient",
+  "description": "This is pasta",
+  "authors": [
+    "Me!"
+  ],
+  "contact": {
+    "homepage": "https://fabricmc.net/",
+    "sources": "https://github.com/FabricMC/fabric-example-mod"
+  },
+  "license": "CC0-1.0",
+  "icon": "assets/hex/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "sg.ec.QuickClient"
+    ]
+  },
+  "mixins": [
+    "quickclient.mixins.json",
+    "quickclient.scripts.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.19.3",
+    "minecraft": "~26.2-",
+    "java": ">=23",
+    "fabric-api": "*"
+  },
+  "accessWidener": "quickclient.accesswidener"
+}
