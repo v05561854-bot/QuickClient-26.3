@@ -6,16 +6,16 @@ import net.minecraft.world.phys.Vec3;
 public final class HumanAimRotation implements AuraRotationStrategy {
     private static final String NAME = "Human Aim";
 
-    private static final float MIN_DURATION = 3.0F;
-    private static final float MAX_DURATION = 14.0F;
-    private static final float BASE_DURATION = 2.0F;
+    private static final float MIN_DURATION = 1.5F;
+    private static final float MAX_DURATION = 8.0F;
+    private static final float BASE_DURATION = 1.2F;
     private static final float FITTS_SCALE = 1.6F;
 
     private static final float OVERSHOOT_MIN = 0.02F;
     private static final float OVERSHOOT_MAX = 0.09F;
     private static final float ARC_MAX = 0.18F;
-    private static final float MIN_CORRECTION = 2.0F;
-    private static final float MAX_CORRECTION = 5.0F;
+    private static final float MIN_CORRECTION = 1.0F;
+    private static final float MAX_CORRECTION = 2.0F;
 
     private static final float TREMOR_YAW = 0.16F;
     private static final float TREMOR_PITCH = 0.11F;
@@ -161,12 +161,12 @@ public final class HumanAimRotation implements AuraRotationStrategy {
             this.arcYaw = 0.0F;
             this.arcPitch = 0.0F;
         } else {
-            float overshoot = distance * RandomUtils.method10454(OVERSHOOT_MIN, OVERSHOOT_MAX);
+            float overshoot = distance * RandomUtils.method10454(OVERSHOOT_MIN * 0.7F, OVERSHOOT_MAX * 0.7F);
             float sign = RandomUtils.method10442() < 0.5F ? -1.0F : 1.0F;
             this.overshootYaw = yawDelta / distance * overshoot * sign;
             this.overshootPitch = pitchDelta / distance * overshoot * sign;
 
-            float arc = distance * RandomUtils.method10454(-ARC_MAX, ARC_MAX);
+            float arc = distance * RandomUtils.method10454(-ARC_MAX * 0.5F, ARC_MAX * 0.5F);
             this.arcYaw = -pitchDelta / distance * arc;
             this.arcPitch = yawDelta / distance * arc;
         }
