@@ -148,7 +148,8 @@ public final class AuraRotationController implements MinecraftAccess {
          new MatrixSnapAuraRotation(),
          new LegitAuraRotation(),
          new SmoothAuraRotation(),
-         new UniversalAuraRotation()
+         new UniversalAuraRotation(),
+         new HumanAimRotation()
       )) {
          var1.put(var3.method02258(), var3);
       }

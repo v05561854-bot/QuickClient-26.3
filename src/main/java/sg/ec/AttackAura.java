@@ -100,6 +100,7 @@ public class AttackAura extends ClientModule {
    private static final String field00818 = "Legit";
    private static final String field00819 = "Smooth";
    private static final String field00820 = "Universal";
+   private static final String field01015 = "Human Aim";
    private static final String field00821 = "Matrix";
    private static final String field00822 = "Дистанция атаки";
    private static final float field00823 = 3.0F;
@@ -402,7 +403,7 @@ public class AttackAura extends ClientModule {
    public AttackAura() {
       super(ModuleCategory.Combat, ModuleSubCategory.Combat);
       this.field00764 = new ModeSetting(field00814)
-         .method05597(field00815, field00816, field00817, field00818, field00819, field00820)
+         .method05597(field00815, field00816, field00817, field00818, field00819, field00820, field01015)
          .method03017(field00821)
          .method03023(this);
       this.field00765 = new NumberSetting<Float>(field00822)
