@@ -367,7 +367,7 @@ public class AttackAura extends ClientModule {
          if (!this.field00773.method04520(field00960) || !mc.player.isUsingItem()) {
             if (!this.method00411() && var1.field11510.method05600(field00963) && this.field00787) {
                Vector2f var3 = PlayerUtils.method11816(mc.player.getEyePosition(), field00785.getEyePosition());
-               RotationManager.method06547(new Rotation(var3.x, var3.y), field00964, 100, this.field00764.method05600(field00965));
+               RotationManager.method06547(new Rotation(var3.x, var3.y), this.method00449(), 100, this.field00764.method05600(field00965));
             }
 
             if (this.field00774.method05600(field00966)) {
