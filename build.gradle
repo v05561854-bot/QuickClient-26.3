@@ -69,6 +69,12 @@ jar {
 	def projectName = project.name
 	inputs.property "projectName", projectName
 
+	// script-api.jar is a plain file dependency, so Loom cannot nest it as a mod.
+	// Merge its classes into the mod jar so hex.script.api is on the runtime classpath.
+	from(zipTree("src/main/resources/script-api.jar")) {
+		include "hex/**"
+	}
+
 	from("LICENSE") {
 		rename { "${it}_$projectName"}
 	}
