@@ -382,7 +382,7 @@ public class ElytraBooster extends ClientModule {
         );
 
         for (int i = 0; i < lookDirs.length; i++) {
-            Vec3 projected = projectVelocity(targetVel, lookDirs[i], pitches[i]);
+            Vec3 projected = projectVelocity(targetVel, lookDirs[i]);
             minBounds[i] = new Vec3(
                 projected.x + Math.min(0.0, predictedMin.x - targetVel.x),
                 projected.y + Math.min(0.0, predictedMin.y - targetVel.y),
@@ -450,52 +450,43 @@ public class ElytraBooster extends ClientModule {
         return isMin ? Math.max(-time, drag * 0.99) : Math.min(time, drag * 0.99);
     }
 
-    private Vec3 projectVelocity(Vec3 targetVel, Vec3 lookDir, float pitch) {
-        float rad = pitch * DEG_TO_RAD;
-        double cosPitch = Math.cos(rad);
-        double cosSq = cosPitch * cosPitch;
-        double horizontalSpeed = Math.sqrt(targetVel.x * targetVel.x + targetVel.z * targetVel.z);
-        double verticalSpeed = Math.abs(targetVel.y) < VEL_THRESHOLD && mc.player.hasEffect(MobEffects.SLOW_FALLING)
-            ? Math.min(targetVel.y, 0.01)
-            : targetVel.y;
+    private Vec3 projectVelocity(Vec3 motion, Vec3 look) {
+        double horizontalLook = Math.sqrt(look.x * look.x + look.z * look.z);
+        double horizontalMotion = motion.horizontalDistance();
+        double cosSquared = horizontalLook * horizontalLook;
+        double gravity = mc.player.getDeltaMovement().y <= 0.0 && mc.player.hasEffect(MobEffects.SLOW_FALLING)
+            ? Math.min(mc.player.getGravity(), 0.01)
+            : mc.player.getGravity();
 
-        double gravity = mc.player.getAttributeValue(Attributes.GRAVITY);
-        if (verticalSpeed <= 0.0 && mc.player.hasEffect(MobEffects.SLOW_FALLING)) {
-            gravity = Math.min(gravity, 0.01);
+        motion = motion.add(0.0, gravity * (-1.0 + cosSquared * 0.75), 0.0);
+
+        if (motion.y < 0.0 && horizontalLook > 0.0) {
+            double lift = motion.y * -0.1 * cosSquared;
+            motion = motion.add(look.x * lift / horizontalLook, lift, look.z * lift / horizontalLook);
         }
 
-        double x = targetVel.x;
-        double y = verticalSpeed + gravity * (1.0 + cosSq * -0.1);
-        double z = targetVel.z;
-
-        if (y < 0.0 && horizontalSpeed > 0.0) {
-            double adjust = y * VERTICAL_DAMPING * cosSq;
-            x += targetVel.x * adjust / horizontalSpeed;
-            y += adjust;
-            z += targetVel.z * adjust / horizontalSpeed;
+        if (look.y > 0.0 && horizontalLook > 0.0) {
+            double lift = horizontalMotion * look.y * 0.04;
+            motion = motion.add(-look.x * lift / horizontalLook, lift * 3.2, -look.z * lift / horizontalLook);
         }
 
-        if (rad < 0.0 && horizontalSpeed > 0.0) {
-            double sinPitch = Math.sqrt(targetVel.x * targetVel.x + targetVel.z * targetVel.z) * -Math.sin(rad) * 0.04;
-            x += -targetVel.x * sinPitch / horizontalSpeed;
-            y += sinPitch * GRAVITY_FACTOR;
-            z += -targetVel.z * sinPitch / horizontalSpeed;
+        if (horizontalLook > 0.0) {
+            motion = motion.add(
+                (look.x / horizontalLook * horizontalMotion - motion.x) * 0.1,
+                0.0,
+                (look.z / horizontalLook * horizontalMotion - motion.z) * 0.1
+            );
         }
 
-        if (horizontalSpeed > 0.0) {
-            x += (targetVel.x / horizontalSpeed * Math.sqrt(targetVel.x * targetVel.x + targetVel.z * targetVel.z) - x) * LERP_FACTOR;
-            z += (targetVel.z / horizontalSpeed * Math.sqrt(targetVel.x * targetVel.x + targetVel.z * targetVel.z) - z) * LERP_FACTOR;
-        }
-
-        return new Vec3(x * DRAG_1, y * DRAG_2, z * DRAG_3);
+        return motion.multiply(0.99, 0.98, 0.99);
     }
 
     private double checkBounds(Vec3 lookVec, Vec3[] lookDirs, float[] pitches, Vec3[] minBounds, Vec3[] maxBounds, Vec3 targetVel, double speed, double distance, double time, boolean isPitch) {
-        Vec3 projected = projectVelocity(lookVec, targetVel, (float) (isPitch ? speed : distance));
+        Vec3 projected = projectVelocity(targetVel, lookVec);
         double maxViolation = 0.0;
 
         for (int i = 0; i < lookDirs.length; i++) {
-            Vec3 relPos = projectVelocity(projected, lookDirs[i], pitches[i]);
+            Vec3 relPos = projectVelocity(projected, lookDirs[i]);
             double violation = isPitch
                 ? Math.max(0.0, Math.max(relPos.y - maxBounds[i].y, minBounds[i].y - relPos.y))
                 : Math.max(0.0, Math.max(relPos.x - maxBounds[i].x, minBounds[i].x - relPos.x))
